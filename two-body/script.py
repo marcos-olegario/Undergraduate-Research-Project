@@ -46,9 +46,19 @@ def get_energy(S):
 
     return KE, PE
 
-# Função de integração numérica pelo método de Euler:
-def euler(S, dt, func):
-    return S + dt * func(S)
+# Função de integração numérica pelo método RK4:
+def rk4(S, dt, func):
+
+    # Calculando termos do método RK4
+    k1 = func(S)
+    k2 = func(S + 0.5*k1*dt)
+    k3 = func(S + 0.5*k2*dt)
+    k4 = func(S + k3*dt)
+
+    # Atualiza S
+    S_prime = (1/6.)*(k1 + 2*k2 + 2*k3 + k4)
+
+    return S + S_prime * dt
 
 # Condições Iniciais
 G = 6.67430e-20  # Constante Gravitacional, [km**3/(kg * s**2)]
@@ -62,7 +72,7 @@ m_2 = 1.0e26  # kg
 
 
 # Simulação
-t = np.arange(0, 540, 0.005)    # Intervalo de simulação
+t = np.arange(0, 520, 0.005)    # Intervalo de simulação
 n_iter = len(t)                 # Número de iterações
 dt = t[1] - t[0]                # Passo de cada iteração
 
@@ -81,7 +91,7 @@ S = s_0
 for i in range(n_iter):
 
     # Consegue a energia do novo estado
-    S = euler(S, dt, get_dotS)
+    S = rk4(S, dt, get_dotS)
 
     # Armazena as posições
     positions[i+1] = S[:,:3]
@@ -91,3 +101,4 @@ for i in range(n_iter):
 
     # Armazena as energias
     energies[i+1] = np.array([KE, PE, KE+PE], dtype=object)
+    
